@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amman Tea Shop</title>
+    <!-- Tailwind CSS CDN for styling and responsive design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2pdf.js CDN for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-amber-50 font-sans text-gray-800 pb-20 md:pb-0">
+
+    <!-- Header / Navbar -->
+    <header class="bg-amber-900 text-amber-100 sticky top-0 z-40 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="showPage('home')">
+                <i data-lucide="coffee" class="w-8 h-8 text-amber-400"></i>
+                <h1 class="text-xl font-bold tracking-wide">Amman Tea Shop</h1>
+            </div>
+            <nav class="hidden md:flex space-x-6 font-medium">
+                <button onclick="showPage('home')" class="hover:text-amber-300 flex items-center gap-1"><i data-lucide="utensils" class="w-4 h-4"></i> Menu</button>
+                <button onclick="showPage('about')" class="hover:text-amber-300 flex items-center gap-1"><i data-lucide="info" class="w-4 h-4"></i> About</button>
+                <button onclick="showPage('billing')" class="hover:text-amber-300 flex items-center gap-1 relative">
+                    <i data-lucide="shopping-cart" class="w-4 h-4"></i> Billing
+                    <span id="cart-badge" class="hidden bg-red-600 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">0</span>
+                </button>
+                <button onclick="showPage('admin')" class="hover:text-amber-300 flex items-center gap-1 text-amber-300"><i data-lucide="settings" class="w-4 h-4"></i> Admin</button>
+            </nav>
+            <div class="md:hidden flex items-center gap-3">
+                <button onclick="showPage('billing')" class="relative p-1">
+                    <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+                    <span id="mobile-cart-badge" class="hidden bg-red-600 text-white text-xs px-1.5 py-0.5 rounded-full font-bold absolute -top-1 -right-1">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-amber-900 text-amber-100 border-t border-amber-800 flex justify-around py-2 z-40">
+        <button onclick="showPage('home')" class="flex flex-col items-center text-xs gap-1">
+            <i data-lucide="utensils" class="w-5 h-5"></i> Menu
+        </button>
+        <button onclick="showPage('about')" class="flex flex-col items-center text-xs gap-1">
+            <i data-lucide="info" class="w-5 h-5"></i> About
+        </button>
+        <button onclick="showPage('billing')" class="flex flex-col items-center text-xs gap-1">
+            <i data-lucide="shopping-bag" class="w-5 h-5"></i> Bill
+        </button>
+        <button onclick="showPage('admin')" class="flex flex-col items-center text-xs gap-1 text-amber-300">
+            <i data-lucide="settings" class="w-5 h-5"></i> Admin
+        </button>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-4">
+
+        <!-- ================= HOME / MENU PAGE ================= -->
+        <section id="page-home" class="space-y-6">
+            <!-- Search & Filters -->
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="relative w-full md:w-1/2">
+                    <i data-lucide="search" class="absolute left-3 top-3 text-gray-400 w-5 h-5"></i>
+                    <input type="text" id="search-input" onkeyup="filterItems()" placeholder="Search tea, snacks, food..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-600 shadow-sm">
+                </div>
+                <!-- Category Tabs -->
+                <div class="flex gap-2 overflow-x-auto w-full md:w-auto no-scrollbar pb-1">
+                    <button onclick="setCategory('all')" class="cat-btn bg-amber-800 text-white px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap shadow-sm">All Items</button>
+                    <button onclick="setCategory('tea')" class="cat-btn bg-white text-gray-700 hover:bg-amber-100 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap shadow-sm">Tea & Coffee</button>
+                    <button onclick="setCategory('snacks')" class="cat-btn bg-white text-gray-700 hover:bg-amber-100 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap shadow-sm">Snacks</button>
+                    <button onclick="setCategory('food')" class="cat-btn bg-white text-gray-700 hover:bg-amber-100 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap shadow-sm">Food</button>
+                    <button onclick="setCategory('cool drinks')" class="cat-btn bg-white text-gray-700 hover:bg-amber-100 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap shadow-sm">Cool Drinks</button>
+                </div>
+            </div>
+
+            <!-- Menu Items Grid -->
+            <div id="menu-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Dynamically populated -->
+            </div>
+        </section>
+
+        <!-- ================= ABOUT PAGE ================= -->
+        <section id="page-about" class="hidden max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-md space-y-6">
+            <div class="text-center border-b pb-4">
+                <h2 class="text-3xl font-bold text-amber-900">Welcome to Amman Tea Shop</h2>
+                <p class="text-gray-600 italic">Serving authentic tea, crispy snacks, and delicious meals since 2010.</p>
+            </div>
+            <img src="https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=800&q=80" alt="Tea Shop" class="w-full h-64 object-cover rounded-lg shadow-sm">
+            <div class="space-y-4 text-gray-700 leading-relaxed">
+                <p>At <strong>Amman Tea Shop</strong>, we believe that a great day begins with a perfect cup of fresh tea. Our wide range of traditional chai, freshly baked snacks, soft tiffins, and refreshing chilled beverages are crafted to refresh your mood at any time of day.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t">
+                    <div class="bg-amber-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-amber-900 mb-1 flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4"></i> Opening Hours</h3>
+                        <p class="text-sm">Monday – Sunday<br>6:00 AM – 10:30 PM</p>
+                    </div>
+                    <div class="bg-amber-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-amber-900 mb-1 flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4"></i> Location</h3>
+                        <p class="text-sm">Main Road Junction, Near Bus Stand, Tamil Nadu, India.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= BILLING PAGE ================= -->
+        <section id="page-billing" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Active Cart -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md space-y-4">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <i data-lucide="shopping-bag" class="w-5 h-5 text-amber-800"></i> Current Order
+                    </h2>
+                    <button onclick="clearCart()" class="text-xs text-red-600 hover:underline flex items-center gap-1">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Clear Cart
+                    </button>
+                </div>
+                
+                <div id="cart-items" class="divide-y divide-gray-100 max-h-96 overflow-y-auto pr-2">
+                    <!-- Cart items dynamic insertion -->
+                </div>
+
+                <div class="pt-4 border-t space-y-2">
+                    <div class="flex justify-between text-gray-600 text-sm">
+                        <span>Subtotal</span>
+                        <span id="subtotal-val">₹0.00</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600 text-sm">
+                        <span>Tax (GST 5%)</span>
+                        <span id="tax-val">₹0.00</span>
+                    </div>
+                    <div class="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t">
+                        <span>Total Amount</span>
+                        <span id="total-val" class="text-amber-900">₹0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Details & Invoice Options -->
+            <div class="bg-white p-6 rounded-xl shadow-md space-y-4 h-fit">
+                <h3 class="font-bold text-gray-800 border-b pb-2">Customer Info</h3>
+                <form id="checkout-form" onsubmit="generateInvoice(event)" class="space-y-3">
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600">Customer Name</label>
+                        <input type="text" id="cust-name" placeholder="Walk-in Customer" class="w-full mt-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-amber-600 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600">Mobile Number (Optional)</label>
+                        <input type="tel" id="cust-phone" placeholder="9876543210" class="w-full mt-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-amber-600 outline-none">
+                    </div>
+                    <button type="submit" class="w-full bg-amber-800 hover:bg-amber-900 text-white font-bold py-2.5 rounded-lg transition-colors flex justify-center items-center gap-2">
+                        <i data-lucide="file-text" class="w-4 h-4"></i> Generate Bill
+                    </button>
+                </form>
+
+                <!-- Action section after bill generation -->
+                <div id="bill-actions" class="hidden space-y-3 pt-4 border-t">
+                    <div class="text-center bg-amber-50 p-3 rounded-lg border border-amber-200">
+                        <p class="text-xs text-amber-900 font-medium mb-1">Scan to Pay via UPI (GPay/PhonePe/Paytm)</p>
+                        <img id="cart-qr-preview" src="" alt="Payment QR Code" class="w-32 h-32 mx-auto border p-1 bg-white rounded shadow-sm">
+                    </div>
+                    <button onclick="downloadPDF()" class="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2.5 rounded-lg transition-colors flex justify-center items-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4"></i> Download PDF Bill
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dynamic Printable Invoice Container (Hidden off-screen for clean PDF export) -->
+        <div class="hidden">
+            <div id="printable-invoice" class="p-6 bg-white font-sans text-gray-800 max-w-sm mx-auto border border-gray-200">
+                <div class="text-center border-b border-gray-300 pb-3 mb-3">
+                    <h2 class="text-2xl font-bold uppercase text-amber-900 tracking-wider">Amman Tea Shop</h2>
+                    <p class="text-[11px] text-gray-500">Fresh Tea, Crispy Snacks & Cool Drinks</p>
+                    <p class="text-[11px] text-gray-500">Main Road, Bus Stand Junction, TN</p>
+                    <p class="text-[11px] text-gray-500">Ph: +91 98765 43210</p>
+                </div>
+                <div class="text-xs space-y-1 mb-3 border-b border-dashed border-gray-300 pb-2">
+                    <p class="flex justify-between"><span>Date:</span> <span id="inv-date"></span></p>
+                    <p class="flex justify-between"><span>Bill No:</span> <span id="inv-no"></span></p>
+                    <p class="flex justify-between"><span>Customer:</span> <span id="inv-cust"></span></p>
+                </div>
+                <table class="w-full text-xs text-left mb-3">
+                    <thead>
+                        <tr class="border-b border-gray-300">
+                            <th class="py-1">Item</th>
+                            <th class="text-center py-1">Qty</th>
+                            <th class="text-right py-1">Price</th>
+                            <th class="text-right py-1">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inv-items-body" class="divide-y divide-gray-100">
+                        <!-- Invoice Rows -->
+                    </tbody>
+                </table>
+                <div class="text-xs space-y-1 border-t border-gray-300 pt-2 font-medium">
+                    <div class="flex justify-between"><span>Subtotal:</span><span id="inv-subtotal"></span></div>
+                    <div class="flex justify-between"><span>GST (5%):</span><span id="inv-tax"></span></div>
+                    <div class="flex justify-between font-bold text-sm text-gray-900 pt-1 border-t"><span>Total Amount:</span><span id="inv-total"></span></div>
+                </div>
+
+                <!-- UPI QR Code Section on Bill -->
+                <div class="text-center mt-4 pt-3 border-t border-dashed border-gray-300 flex flex-col items-center">
+                    <p class="text-[10px] font-bold text-gray-700 uppercase tracking-wide mb-1">Scan & Pay via Any UPI App</p>
+                    <img id="inv-qr-code" src="" alt="UPI Payment QR Code" class="w-28 h-28 border p-1 bg-white rounded">
+                    <p class="text-[9px] text-gray-500 mt-1">Accepting GPay, PhonePe, Paytm & BHIM</p>
+                </div>
+
+                <div class="text-center text-[10px] text-gray-500 mt-4">
+                    <p>Thank you! Visit again!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= ADMIN PAGE ================= -->
+        <section id="page-admin" class="hidden max-w-4xl mx-auto space-y-6">
+            <!-- Payment QR Settings -->
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h2 class="text-xl font-bold text-gray-800 border-b pb-3 mb-4 flex items-center gap-2">
+                    <i data-lucide="qr-code" class="w-5 h-5 text-amber-800"></i> UPI Payment Configuration
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600">Merchant UPI ID (e.g. GooglePay / Paytm VPA)</label>
+                        <input type="text" id="admin-upi-id" placeholder="ammanteashop@upi" class="w-full mt-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-amber-600 outline-none">
+                    </div>
+                    <button onclick="saveUpiId()" class="bg-amber-800 hover:bg-amber-900 text-white font-bold py-2 px-6 rounded-lg text-sm transition-colors w-full md:w-auto">
+                        Save UPI Settings
+                    </button>
+                </div>
+            </div>
+
+            <!-- Add / Edit Menu Item -->
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h2 class="text-xl font-bold text-gray-800 border-b pb-3 mb-4 flex items-center gap-2">
+                    <i data-lucide="plus-circle" class="w-5 h-5 text-amber-800"></i> Add / Edit Menu Item
+                </h2>
+                <form id="admin-form" onsubmit="saveMenuItem(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="hidden" id="admin-item-id">
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600">Item Name</label>
+                        <input type="text" id="admin-item-name" required placeholder="e.g. Masala Chai" class="w-full mt-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-amber-600 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600">Category</label>
+                        <select id="admin-item-cat" required class="w-full mt-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-amber-600 outline-none">
+                            <option value="tea">Tea & Coffee</option>
+                            <option value="snacks">Snacks</option>
+                            <option value="food">Food</option>
+                            <option value="cool drinks">Cool Drinks</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600">Price (₹)</label>
+                        <input type="number" id="admin-item-price" required min="1" step="0.5" placeholder="15" class="w-full mt-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-amber-600 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600">Image URL (Open Source / Unsplash)</label>
+                        <input type="url" id="admin-item-img" required placeholder="https://images.unsplash.com/..." class="w-full mt-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-amber-600 outline-none">
+                    </div>
+                    <div class="md:col-span-2 flex gap-2">
+                        <button type="submit" class="bg-amber-800 hover:bg-amber-900 text-white font-bold py-2 px-6 rounded-lg text-sm transition-colors">
+                            Save Item
+                        </button>
+                        <button type="button" onclick="resetAdminForm()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg text-sm">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Existing Items Table -->
+            <div class="bg-white p-6 rounded-xl shadow-md overflow-x-auto">
+                <h3 class="font-bold text-gray-800 border-b pb-3 mb-4">Manage Current Menu Items</h3>
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="bg-amber-50 text-amber-900">
+                            <th class="p-3">Image</th>
+                            <th class="p-3">Name</th>
+                            <th class="p-3">Category</th>
+                            <th class="p-3">Price</th>
+                            <th class="p-3 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-menu-table" class="divide-y">
+                        <!-- Admin rows populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Default Database Initializer
+        const defaultMenu = [
+            { id: '1', name: 'Special Tea', category: 'tea', price: 15, img: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=400&q=80' },
+            { id: '2', name: 'Filter Coffee', category: 'tea', price: 20, img: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=400&q=80' },
+            { id: '3', name: 'Samosa (2 pcs)', category: 'snacks', price: 25, img: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=400&q=80' },
+            { id: '4', name: 'Medu Vada (2 pcs)', category: 'snacks', price: 30, img: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=400&q=80' },
+            { id: '5', name: 'Masala Dosa', category: 'food', price: 70, img: 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?auto=format&fit=crop&w=400&q=80' },
+            { id: '6', name: 'Parotta (2 pcs)', category: 'food', price: 50, img: 'https://images.unsplash.com/photo-1626074353765-517a681e40be?auto=format&fit=crop&w=400&q=80' },
+            { id: '7', name: 'Fresh Rose Milk', category: 'cool drinks', price: 35, img: 'https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&w=400&q=80' },
+            { id: '8', name: 'Lemon Juice', category: 'cool drinks', price: 25, img: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=400&q=80' }
+        ];
+
+        function getDB() {
+            const data = localStorage.getItem('amman_menu_db');
+            return data ? JSON.parse(data) : defaultMenu;
+        }
+
+        function saveDB(data) {
+            localStorage.setItem('amman_menu_db', JSON.stringify(data));
+        }
+
+        function getUpiId() {
+            return localStorage.getItem('amman_upi_id') || 'ammanteashop@upi';
+        }
+
+        function saveUpiId() {
+            const val = document.getElementById('admin-upi-id').value.trim();
+            if (val) {
+                localStorage.setItem('amman_upi_id', val);
+                alert("UPI Merchant ID saved successfully!");
+            }
+        }
+
+        // Global State Variables
+        let cart = [];
+        let currentCategory = 'all';
+
+        // DOM Loaded Init
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderMenu();
+            renderCart();
+            renderAdminTable();
+            document.getElementById('admin-upi-id').value = getUpiId();
+        });
+
+        // Navigation Controls
+        function showPage(pageId) {
+            ['home', 'about', 'billing', 'admin'].forEach(p => {
+                document.getElementById(`page-${p}`).classList.add('hidden');
+            });
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+        }
+
+        // Search and Filtering
+        function setCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                if (btn.textContent.toLowerCase().includes(cat) || (cat === 'all' && btn.textContent === 'All Items')) {
+                    btn.className = "cat-btn bg-amber-800 text-white px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap shadow-sm";
+                } else {
+                    btn.className = "cat-btn bg-white text-gray-700 hover:bg-amber-100 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap shadow-sm";
+                }
+            });
+            filterItems();
+        }
+
+        function filterItems() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const db = getDB();
+            const filtered = db.filter(item => {
+                const matchesCat = (currentCategory === 'all' || item.category === currentCategory);
+                const matchesSearch = item.name.toLowerCase().includes(query);
+                return matchesCat && matchesSearch;
+            });
+            renderGrid(filtered);
+        }
+
+        function renderMenu() {
+            renderGrid(getDB());
+        }
+
+        function renderGrid(items) {
+            const grid = document.getElementById('menu-grid');
+            if (items.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500">No menu items found.</div>`;
+                return;
+            }
+
+            grid.innerHTML = items.map(item => `
+                <div class="bg-white rounded-xl shadow-md overflow-hidden flex flex-col justify-between hover:shadow-lg transition-shadow">
+                    <img src="${item.img}" alt="${item.name}" class="h-32 sm:h-40 w-full object-cover">
+                    <div class="p-3 flex-1 flex flex-col justify-between">
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">${item.category}</span>
+                            <h3 class="font-bold text-gray-800 mt-1 text-sm sm:text-base">${item.name}</h3>
+                        </div>
+                        <div class="flex items-center justify-between mt-3">
+                            <span class="font-bold text-amber-900 text-sm sm:text-base">₹${item.price}</span>
+                            <button onclick="addToCart('${item.id}')" class="bg-amber-800 hover:bg-amber-900 text-white p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1">
+                                <i data-lucide="plus" class="w-4 h-4"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // Cart and Billing Logic
+        function addToCart(itemId) {
+            const db = getDB();
+            const item = db.find(i => i.id === itemId);
+            const existing = cart.find(c => c.id === itemId);
+
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ ...item, qty: 1 });
+            }
+            updateCartBadge();
+            renderCart();
+        }
+
+        function updateCartBadge() {
+            const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+            ['cart-badge', 'mobile-cart-badge'].forEach(id => {
+                const badge = document.getElementById(id);
+                if (totalQty > 0) {
+                    badge.textContent = totalQty;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            });
+        }
+
+        function changeQty(itemId, delta) {
+            const idx = cart.findIndex(c => c.id === itemId);
+            if (idx > -1) {
+                cart[idx].qty += delta;
+                if (cart[idx].qty <= 0) cart.splice(idx, 1);
+            }
+            updateCartBadge();
+            renderCart();
+        }
+
+        function clearCart() {
+            cart = [];
+            updateCartBadge();
+            renderCart();
+            document.getElementById('bill-actions').classList.add('hidden');
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-items');
+            if (cart.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-gray-400">Your order cart is empty.</div>`;
+                updateTotals(0);
+                return;
+            }
+
+            container.innerHTML = cart.map(item => `
+                <div class="py-3 flex items-center justify-between">
+                    <div>
+                        <h4 class="font-medium text-gray-800 text-sm">${item.name}</h4>
+                        <span class="text-xs text-gray-500">₹${item.price} each</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center border rounded-lg overflow-hidden">
+                            <button onclick="changeQty('${item.id}', -1)" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-xs font-bold">-</button>
+                            <span class="px-3 py-1 text-xs font-bold">${item.qty}</span>
+                            <button onclick="changeQty('${item.id}', 1)" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-xs font-bold">+</button>
+                        </div>
+                        <span class="font-bold text-sm w-12 text-right">₹${item.price * item.qty}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            updateTotals(subtotal);
+        }
+
+        function updateTotals(subtotal) {
+            const tax = subtotal * 0.05;
+            const total = subtotal + tax;
+
+            document.getElementById('subtotal-val').textContent = `₹${subtotal.toFixed(2)}`;
+            document.getElementById('tax-val').textContent = `₹${tax.toFixed(2)}`;
+            document.getElementById('total-val').textContent = `₹${total.toFixed(2)}`;
+        }
+
+        // Invoice Generation & Dynamic QR Code Creation
+        function generateInvoice(e) {
+            e.preventDefault();
+            if (cart.length === 0) {
+                alert("Please add items to your cart before generating a bill.");
+                return;
+            }
+
+            const custName = document.getElementById('cust-name').value.trim() || 'Walk-in Customer';
+            const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            const tax = subtotal * 0.05;
+            const total = subtotal + tax;
+            const upiId = getUpiId();
+
+            document.getElementById('inv-date').textContent = new Date().toLocaleString();
+            document.getElementById('inv-no').textContent = "AT-" + Math.floor(100000 + Math.random() * 900000);
+            document.getElementById('inv-cust').textContent = custName;
+
+            const tbody = document.getElementById('inv-items-body');
+            tbody.innerHTML = cart.map(item => `
+                <tr class="border-b border-gray-100">
+                    <td class="py-1">${item.name}</td>
+                    <td class="text-center py-1">${item.qty}</td>
+                    <td class="text-right py-1">₹${item.price}</td>
+                    <td class="text-right py-1">₹${item.price * item.qty}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('inv-subtotal').textContent = `₹${subtotal.toFixed(2)}`;
+            document.getElementById('inv-tax').textContent = `₹${tax.toFixed(2)}`;
+            document.getElementById('inv-total').textContent = `₹${total.toFixed(2)}`;
+
+            // Generate UPI payment QR Code URL dynamically using total amount
+            const upiUrl = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=Amman%20Tea%20Shop&am=${total.toFixed(2)}&cu=INR`;
+            const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUrl)}`;
+
+            document.getElementById('cart-qr-preview').src = qrImageUrl;
+            document.getElementById('inv-qr-code').src = qrImageUrl;
+
+            document.getElementById('bill-actions').classList.remove('hidden');
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('printable-invoice');
+            const invNo = document.getElementById('inv-no').textContent;
+            
+            const opt = {
+                margin:       0.3,
+                filename:     `Bill_${invNo}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'a5', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save();
+        }
+
+        // Admin Management Logic
+        function renderAdminTable() {
+            const db = getDB();
+            const tbody = document.getElementById('admin-menu-table');
+            tbody.innerHTML = db.map(item => `
+                <tr>
+                    <td class="p-3"><img src="${item.img}" class="w-10 h-10 object-cover rounded-md"></td>
+                    <td class="p-3 font-medium">${item.name}</td>
+                    <td class="p-3 capitalize">${item.category}</td>
+                    <td class="p-3 font-bold">₹${item.price}</td>
+                    <td class="p-3 text-right space-x-2">
+                        <button onclick="editMenuItem('${item.id}')" class="text-blue-600 hover:underline text-xs font-bold">Edit</button>
+                        <button onclick="deleteMenuItem('${item.id}')" class="text-red-600 hover:underline text-xs font-bold">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function saveMenuItem(e) {
+            e.preventDefault();
+            const id = document.getElementById('admin-item-id').value;
+            const name = document.getElementById('admin-item-name').value.trim();
+            const category = document.getElementById('admin-item-cat').value;
+            const price = parseFloat(document.getElementById('admin-item-price').value);
+            const img = document.getElementById('admin-item-img').value.trim();
+
+            let db = getDB();
+
+            if (id) {
+                db = db.map(i => i.id === id ? { id, name, category, price, img } : i);
+            } else {
+                const newItem = {
+                    id: Date.now().toString(),
+                    name,
+                    category,
+                    price,
+                    img
+                };
+                db.push(newItem);
+            }
+
+            saveDB(db);
+            resetAdminForm();
+            renderAdminTable();
+            renderMenu();
+            alert("Menu saved successfully!");
+        }
+
+        function editMenuItem(id) {
+            const db = getDB();
+            const item = db.find(i => i.id === id);
+            if (item) {
+                document.getElementById('admin-item-id').value = item.id;
+                document.getElementById('admin-item-name').value = item.name;
+                document.getElementById('admin-item-cat').value = item.category;
+                document.getElementById('admin-item-price').value = item.price;
+                document.getElementById('admin-item-img').value = item.img;
+            }
+        }
+
+        function deleteMenuItem(id) {
+            if (confirm("Are you sure you want to delete this menu item?")) {
+                let db = getDB();
+                db = db.filter(i => i.id !== id);
+                saveDB(db);
+                renderAdminTable();
+                renderMenu();
+            }
+        }
+
+        function resetAdminForm() {
+            document.getElementById('admin-form').reset();
+            document.getElementById('admin-item-id').value = '';
+        }
+    </script>
+</body>
+</html>
